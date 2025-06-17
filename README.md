@@ -95,6 +95,23 @@ Alternatively, you can set the `AWS_PROFILE` environmental variable to the name 
 
 Once you log in you can use the AWS CLI or SDKs as usual!
 
+### Troubleshooting
+
+#### Sandbox Issues
+
+If you encounter sandbox-related errors when running the tool (especially on certain Linux distributions or containerized environments), you can disable the Chromium sandbox using the `--no-sandbox` flag:
+
+    go-aws-azure-login --no-sandbox
+
+This bypasses Chromium's sandbox security feature and can resolve errors like:
+
+    panic: [launcher] Failed to get the debug url: [...] No usable sandbox! Update your kernel or see https://chromium.googlesource.com/chromium/src/+/main/docs/linux/suid_sandbox_development.md for more information
+
+You can combine this with other flags as needed:
+
+    go-aws-azure-login --profile myprofile --no-prompt --no-sandbox
+
+**Note:** Using `--no-sandbox` reduces security by disabling Chromium's sandbox. Only use this flag when necessary to resolve compatibility issues.
 
 ## Automation
 
