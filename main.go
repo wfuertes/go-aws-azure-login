@@ -16,6 +16,7 @@ var (
 	noPrompt        bool
 	disableLeakless bool
 	fastPass        bool
+	noSandbox       bool
 )
 
 func init() {
@@ -38,6 +39,8 @@ func init() {
 		disableLeaklessUsage        = "Disable leakless if you are having issues with it"
 		fastPassDefaultValue        = false
 		fastPassUsage               = "Use Okta FastPass verification"
+		noSandboxDefaultValue       = false
+		noSandboxUsage              = "Disable Chromium sandbox (use when getting sandbox-related errors)"
 	)
 
 	flag.StringVar(&profile, "profile", profileDefaultValue, profileUsage)
@@ -54,6 +57,7 @@ func init() {
 	flag.BoolVar(&noPrompt, "no-prompt", noPromptDefaultValue, noPromptUsage)
 	flag.BoolVar(&disableLeakless, "disable-leakless", disableLeaklessDefaultValue, disableLeaklessUsage)
 	flag.BoolVar(&fastPass, "fastpass", fastPassDefaultValue, fastPassUsage)
+	flag.BoolVar(&noSandbox, "no-sandbox", noSandboxDefaultValue, noSandboxUsage)
 
 	flag.Parse()
 	if flag.NArg() > 0 {
@@ -79,9 +83,9 @@ func main() {
 		configureProfile(profileName)
 	} else {
 		if allProfiles {
-			loginAll(forceRefresh, noVerifySSL, noPrompt, isGui, disableLeakless, fastPass)
+			loginAll(forceRefresh, noVerifySSL, noPrompt, isGui, disableLeakless, fastPass, noSandbox)
 		} else {
-			login(profileName, noVerifySSL, noPrompt, isGui, disableLeakless, fastPass)
+			login(profileName, noVerifySSL, noPrompt, isGui, disableLeakless, fastPass, noSandbox)
 		}
 	}
 

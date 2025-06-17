@@ -564,7 +564,8 @@ func login(
 	noPrompt bool,
 	isGui bool,
 	disableLeakless bool,
-	fastPass bool) {
+	fastPass bool,
+	noSandbox bool) {
 
 	profile := loadProfile(profileName)
 
@@ -580,7 +581,7 @@ func login(
 
 	loginUrl := createLoginUrl(profile.AzureAppIDUri, profile.AzureTenantID, assertionConsumerServiceURL)
 
-	saml := performLogin(loginUrl, noPrompt, profile.AzureDefaultUsername, profile.AzureDefaultPassword, profile.OktaDefaultUsername, profile.OktaDefaultPassword, isGui, disableLeakless, fastPass)
+	saml := performLogin(loginUrl, noPrompt, profile.AzureDefaultUsername, profile.AzureDefaultPassword, profile.OktaDefaultUsername, profile.OktaDefaultPassword, isGui, disableLeakless, fastPass, noSandbox)
 
 	roles := parseRolesFromSamlResponse(saml)
 
@@ -589,7 +590,7 @@ func login(
 	assumeRole(profileName, saml, rl, durationHours, awsNoVerifySsl, profile.Region)
 }
 
-func loginAll(forceRefresh bool, awsNoVerifySsl bool, noPrompt bool, isGui bool, disableLeakless bool, fastPass bool) {
+func loginAll(forceRefresh bool, awsNoVerifySsl bool, noPrompt bool, isGui bool, disableLeakless bool, fastPass bool, noSandbox bool) {
 	allProfiles := getAllProfileNames()
 
 	for _, profileName := range allProfiles {
@@ -597,7 +598,7 @@ func loginAll(forceRefresh bool, awsNoVerifySsl bool, noPrompt bool, isGui bool,
 			continue
 		}
 
-		login(profileName, awsNoVerifySsl, noPrompt, isGui, disableLeakless, fastPass)
+		login(profileName, awsNoVerifySsl, noPrompt, isGui, disableLeakless, fastPass, noSandbox)
 	}
 }
 
@@ -624,10 +625,14 @@ func createLoginUrl(appIDUri string, tenantID string, assertionConsumerServiceUR
 	return fmt.Sprintf("https://login.microsoftonline.com/%s/saml2?SAMLRequest=%s", tenantID, url.QueryEscape(samlBase64))
 }
 
-func performLogin(urlString string, noPrompt bool, defaultUserName string, defaultUserPassword *string, defaultOktaUserName *string, defaultOktaPassword *string, isGui bool, disableLeakless bool, fastpass bool) string {
+func performLogin(urlString string, noPrompt bool, defaultUserName string, defaultUserPassword *string, defaultOktaUserName *string, defaultOktaPassword *string, isGui bool, disableLeakless bool, fastpass bool, noSandbox bool) string {
 	l := launcher.New().Headless(!isGui)
 
 	l.Leakless(!disableLeakless)
+
+	if noSandbox {
+		l.NoSandbox(true)
+	}
 
 	u := l.MustLaunch()
 	browser := rod.New().ControlURL(u).MustConnect()
